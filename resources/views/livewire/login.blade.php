@@ -1,21 +1,5 @@
-<!DOCTYPE html>
-<html lang="es">
+<div>
 
-<head>
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Iniciar sesión | Postres María José</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-        rel="stylesheet">
 
     <style>
         * {
@@ -914,9 +898,7 @@
             }
         }
     </style>
-</head>
 
-<body>
 
     <div class="container">
 
@@ -1041,9 +1023,7 @@
 
                     @endif
 
-                    <form method="POST" action="{{ route('login.procesar') }}">
-
-                        @csrf
+                    <form wire:submit="login">
 
                         <div class="campos">
 
@@ -1059,18 +1039,15 @@
                                         person
                                     </span>
 
-                                    <input type="text" id="usuario" name="usuario" class="input"
-                                        value="{{ old('usuario') }}" placeholder="Ingrese su usuario"
-                                        autocomplete="username" required autofocus>
+                                    <input type="text" id="usuario" wire:model="usuario" class="input"
+                                        placeholder="Ingrese su usuario" autocomplete="username" autofocus>
 
                                 </div>
 
                                 @error('usuario')
-
                                     <div class="error">
                                         {{ $message }}
                                     </div>
-
                                 @enderror
 
                             </div>
@@ -1087,8 +1064,8 @@
                                         lock
                                     </span>
 
-                                    <input type="password" id="password" name="password" class="input showPass"
-                                        placeholder="Ingrese su contraseña" autocomplete="current-password" required>
+                                    <input type="password" id="password" wire:model="password" class="input showPass"
+                                        placeholder="Ingrese su contraseña" autocomplete="current-password">
 
                                     <button type="button" class="btton-pass" onclick="togglePassword()"
                                         aria-label="Mostrar u ocultar contraseña">
@@ -1102,11 +1079,9 @@
                                 </div>
 
                                 @error('password')
-
                                     <div class="error">
                                         {{ $message }}
                                     </div>
-
                                 @enderror
 
                             </div>
@@ -1115,7 +1090,7 @@
 
                                 <label class="recordar">
 
-                                    <input type="checkbox" name="recordar" value="1">
+                                    <input type="checkbox" wire:model="recordar">
 
                                     Recordar sesión
 
@@ -1142,8 +1117,8 @@
                         ¿Problemas para entrar?
                         Escribe a
                         <a href="#">
-                            soporte del negocio
-                        </a>.
+                            soporte del negocio.
+                        </a>
 
                     </div>
 
@@ -1180,7 +1155,4 @@
         }
 
     </script>
-
-</body>
-
-</html>
+</div>

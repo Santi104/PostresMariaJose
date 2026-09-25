@@ -14,6 +14,7 @@ class Usuario extends Authenticatable
     protected $fillable = [
         'nombre',
         'usuario',
+        'correo',
         'password',
         'activo',
     ];
@@ -25,5 +26,6 @@ class Usuario extends Authenticatable
 
     protected $casts = [
         'activo' => 'boolean',
+        'password' => 'hashed',
     ];
 }
