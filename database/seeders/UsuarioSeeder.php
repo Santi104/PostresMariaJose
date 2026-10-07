@@ -13,6 +13,7 @@ class UsuarioSeeder extends Seeder
         Usuario::create([
             'nombre' => 'Empleado',
             'usuario' => 'empleado',
+            'correo' => 'empleado@postresmj.local',
             'password' => Hash::make('123456'),
             'activo' => true,
         ]);

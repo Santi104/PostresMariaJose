@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Livewire\Login;
 use App\Livewire\Dashboard;
 use App\Livewire\CreateUser;
+use App\Livewire\Reportes;
 
 Route::get('/login', Login::class)
     ->name('login');
@@ -19,3 +20,7 @@ Route::get('/', Dashboard::class)
 Route::get('/usuarios/crear', CreateUser::class)
     ->middleware('auth')
     ->name('usuarios.crear');
+
+Route::get('/reportes', Reportes::class)
+    ->middleware('auth')
+    ->name('reportes');

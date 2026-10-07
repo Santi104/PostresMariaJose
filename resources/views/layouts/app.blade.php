@@ -119,11 +119,10 @@
                     <span>Caja</span>
                 </a>
 
-                <a href="#" class="navigation-item">
+                <a href="{{ route('reportes') }}" class="navigation-item">
                     <span class="material-symbols-rounded">
                         bar_chart
                     </span>
-
                     <span>Reportes</span>
                 </a>
 
