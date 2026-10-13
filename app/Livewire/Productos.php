@@ -2,159 +2,196 @@
 
 namespace App\Livewire;
 
+use App\Models\Categoria;
+use App\Models\Producto;
+use Illuminate\Validation\Rule;
+use Illuminate\Database\QueryException;
 use Livewire\Component;
 
 class Productos extends Component
 {
     public string $busqueda = '';
+    public string $categoria = '';
 
-    public string $categoria = 'Todas las categorías';
+    public bool $mostrarFormulario = false;
+    public bool $modoEdicion = false;
+    public ?int $producto_id = null;
 
-    public array $productos = [
-        [
-            'nombre' => 'Merengón clásico',
-            'sku' => 'SKU-MER-CLA',
-            'categoria' => 'Postres',
-            'precio' => 8000,
-            'stock' => 12,
-            'minimo' => 10,
-            'estado' => 'Disponible',
-        ],
+    public string $nombre = '';
+    public string $codigo = '';
+    public string $categoria_id = '';
+    public string $descripcion = '';
+    public string $precio_venta = '';
+    public string $costo_unitario = '';
+    public string $stock_minimo = '0';
 
-        [
-            'nombre' => 'Merengón de frutos rojos',
-            'sku' => 'SKU-MER-FRU',
-            'categoria' => 'Postres',
-            'precio' => 10500,
-            'stock' => 3,
-            'minimo' => 6,
-            'estado' => 'Bajo stock',
-        ],
-
-        [
-            'nombre' => 'Fresas con crema',
-            'sku' => 'SKU-FRE-CRE',
-            'categoria' => 'Postres',
-            'precio' => 9000,
-            'stock' => 8,
-            'minimo' => 6,
-            'estado' => 'Disponible',
-        ],
-
-        [
-            'nombre' => 'Postre de Milo',
-            'sku' => 'SKU-MIL',
-            'categoria' => 'Postres',
-            'precio' => 9500,
-            'stock' => 6,
-            'minimo' => 5,
-            'estado' => 'Disponible',
-        ],
-
-        [
-            'nombre' => 'Oblea sencilla',
-            'sku' => 'SKU-OBL-SEN',
-            'categoria' => 'Postres',
-            'precio' => 5000,
-            'stock' => 0,
-            'minimo' => 10,
-            'estado' => 'Disponible',
-        ],
-
-        [
-            'nombre' => 'Oblea especial',
-            'sku' => 'SKU-OBL-ESP',
-            'categoria' => 'Postres',
-            'precio' => 7500,
-            'stock' => 2,
-            'minimo' => 6,
-            'estado' => 'Bajo stock',
-        ],
-
-        [
-            'nombre' => 'Torta de zanahoria · porción',
-            'sku' => 'SKU-TOR-ZAN',
-            'categoria' => 'Tortas',
-            'precio' => 7500,
-            'stock' => 9,
-            'minimo' => 4,
-            'estado' => 'Disponible',
-        ],
-
-        [
-            'nombre' => 'Torta tres leches · porción',
-            'sku' => 'SKU-TOR-TRE',
-            'categoria' => 'Tortas',
-            'precio' => 8500,
-            'stock' => 4,
-            'minimo' => 6,
-            'estado' => 'Bajo stock',
-        ],
-
-        [
-            'nombre' => 'Torta de chocolate · porción',
-            'sku' => 'SKU-TOR-CHO',
-            'categoria' => 'Tortas',
-            'precio' => 8000,
-            'stock' => 7,
-            'minimo' => 4,
-            'estado' => 'Disponible',
-        ],
-
-        [
-            'nombre' => 'Torta entera de maracuyá',
-            'sku' => 'SKU-TOR-MAR',
-            'categoria' => 'Tortas',
-            'precio' => 95000,
-            'stock' => 0,
-            'minimo' => 1,
-            'estado' => 'Agotado',
-        ],
-
-        [
-            'nombre' => 'Agua botella 600 ml',
-            'sku' => 'SKU-AGU',
-            'categoria' => 'Bebidas',
-            'precio' => 2500,
-            'stock' => 48,
-            'minimo' => 24,
-            'estado' => 'Disponible',
-        ],
-
-        [
-            'nombre' => 'Gaseosa personal',
-            'sku' => 'SKU-GAS',
-            'categoria' => 'Bebidas',
-            'precio' => 4000,
-            'stock' => 30,
-            'minimo' => 12,
-            'estado' => 'Disponible',
-        ],
-    ];
-
-    public function getProductosFiltradosProperty(): array
+    public function getProductosFiltradosProperty()
     {
-        return array_values(
-            array_filter($this->productos, function ($producto) {
+        return Producto::with('categoria')
+            ->when(trim($this->busqueda) !== '', function ($query) {
+                $busqueda = trim($this->busqueda);
 
-                $coincideCategoria =
-                    $this->categoria === 'Todas las categorías'
-                    || $producto['categoria'] === $this->categoria;
-
-                $coincideBusqueda =
-                    $this->busqueda === ''
-                    || str_contains(
-                        strtolower($producto['nombre']),
-                        strtolower($this->busqueda)
-                    )
-                    || str_contains(
-                        strtolower($producto['sku']),
-                        strtolower($this->busqueda)
-                    );
-
-                return $coincideCategoria && $coincideBusqueda;
+                $query->where(function ($q) use ($busqueda) {
+                    $q->where('nombre', 'like', "%{$busqueda}%")
+                        ->orWhere('codigo', 'like', "%{$busqueda}%");
+                });
             })
+            ->when($this->categoria !== '', function ($query) {
+                $query->where('categoria_id', $this->categoria);
+            })
+            ->orderBy('nombre')
+            ->get()
+            ->map(function ($producto) {
+                if (!$producto->activo) {
+                    $estado = 'Inactivo';
+                } elseif ($producto->stock_actual <= 0) {
+                    $estado = 'Agotado';
+                } elseif ($producto->stock_actual <= $producto->stock_minimo) {
+                    $estado = 'Bajo stock';
+                } else {
+                    $estado = 'Disponible';
+                }
+
+
+                return [
+                    'id' => $producto->id,
+                    'nombre' => $producto->nombre,
+                    'sku' => $producto->codigo,
+                    'categoria' => $producto->categoria?->nombre ?? 'Sin categoría',
+                    'precio' => $producto->precio_venta,
+                    'stock' => $producto->stock_actual,
+                    'minimo' => $producto->stock_minimo,
+                    'estado' => $estado,
+                    'activo' => (bool) $producto->activo,
+                ];
+            });
+    }
+
+    public function getCategoriasProperty()
+    {
+        return Categoria::where('activo', true)
+            ->orderBy('nombre')
+            ->get();
+    }
+
+    public function abrirFormulario()
+    {
+        $this->resetFormulario();
+        $this->resetValidation();
+
+        $this->modoEdicion = false;
+        $this->mostrarFormulario = true;
+    }
+
+    public function editarProducto(int $id)
+    {
+        $producto = Producto::findOrFail($id);
+
+        $this->producto_id = $producto->id;
+        $this->nombre = $producto->nombre;
+        $this->codigo = $producto->codigo;
+        $this->categoria_id = (string) $producto->categoria_id;
+        $this->descripcion = $producto->descripcion ?? '';
+        $this->precio_venta = (string) $producto->precio_venta;
+        $this->costo_unitario = (string) $producto->costo_unitario;
+        $this->stock_minimo = (string) $producto->stock_minimo;
+
+        $this->modoEdicion = true;
+        $this->mostrarFormulario = true;
+
+        $this->resetValidation();
+    }
+
+    public function guardarProducto()
+    {
+        $datos = $this->validate([
+            'nombre' => 'required|string|max:150',
+            'codigo' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('productos', 'codigo')
+                    ->ignore($this->producto_id),
+            ],
+            'categoria_id' => 'required|exists:categorias,id',
+            'descripcion' => 'nullable|string|max:1000',
+            'precio_venta' => 'required|numeric|min:0',
+            'costo_unitario' => 'required|numeric|min:0',
+            'stock_minimo' => 'required|integer|min:0',
+        ]);
+
+        if ($this->modoEdicion) {
+            $producto = Producto::findOrFail($this->producto_id);
+            $producto->update($datos);
+
+            $mensaje = 'Producto actualizado correctamente.';
+        } else {
+            Producto::create([
+                ...$datos,
+                'stock_actual' => 0,
+                'activo' => true,
+            ]);
+
+            $mensaje = 'Producto creado correctamente.';
+        }
+
+        $this->cerrarFormulario();
+
+        session()->flash('mensaje', $mensaje);
+    }
+
+    public function cambiarEstado(int $id)
+    {
+        $producto = Producto::findOrFail($id);
+
+        $producto->activo = !$producto->activo;
+        $producto->save();
+
+        session()->flash(
+            'mensaje',
+            $producto->activo
+            ? 'Producto activado correctamente.'
+            : 'Producto desactivado correctamente.'
         );
+    }
+
+    public function eliminarProducto(int $id)
+    {
+        $producto = Producto::findOrFail($id);
+
+        try {
+            $producto->delete();
+
+            session()->flash('mensaje', 'Producto eliminado correctamente.');
+        } catch (QueryException $e) {
+            session()->flash(
+                'mensaje',
+                'No se puede eliminar este producto porque puede tener ventas o movimientos relacionados. Puedes desactivarlo.'
+            );
+        }
+    }
+
+    public function cerrarFormulario()
+    {
+        $this->mostrarFormulario = false;
+        $this->resetFormulario();
+        $this->resetValidation();
+    }
+
+    private function resetFormulario()
+    {
+        $this->reset([
+            'producto_id',
+            'nombre',
+            'codigo',
+            'categoria_id',
+            'descripcion',
+            'precio_venta',
+            'costo_unitario',
+            'stock_minimo',
+        ]);
+
+        $this->stock_minimo = '0';
     }
 
     public function render()

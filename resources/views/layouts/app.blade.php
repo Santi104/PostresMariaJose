@@ -54,45 +54,33 @@
                         Operación
                     </div>
 
-                    <a href="#" class="navigation-item active"
-                        onclick="cambiarModulo('dashboard', this); return false;">
-                        <span class="material-symbols-rounded">
-                            cottage
-                        </span>
-
+                    <a href="{{ route('inicio') }}"
+                        class="navigation-item {{ request()->routeIs('inicio') ? 'active' : '' }}">
+                        <span class="material-symbols-rounded">cottage</span>
                         <span>Inicio</span>
                     </a>
 
-                    <a href="#" class="navigation-item" onclick="cambiarModulo('ventas', this); return false;">
-                        <span class="material-symbols-rounded">
-                            point_of_sale
-                        </span>
-
+                    <a href="{{ url('/ventas') }}"
+                        class="navigation-item {{ request()->is('ventas') ? 'active' : '' }}">
+                        <span class="material-symbols-rounded">point_of_sale</span>
                         <span>Ventas</span>
                     </a>
 
-                    <a href="#" class="navigation-item"
-                        onclick="cambiarModulo('inventario', this); return false;">
-                        <span class="material-symbols-rounded">
-                            inventory_2
-                        </span>
-
+                    <a href="{{ url('/inventario') }}"
+                        class="navigation-item {{ request()->is('inventario') ? 'active' : '' }}">
+                        <span class="material-symbols-rounded">inventory_2</span>
                         <span>Inventario</span>
                     </a>
-                    <a href="#" class="navigation-item"
-                        onclick="cambiarModulo('produccion', this); return false;">
-                        <span class="material-symbols-rounded">
-                            bakery_dining
-                        </span>
 
+                    <a href="{{ url('/produccion') }}"
+                        class="navigation-item {{ request()->is('produccion') ? 'active' : '' }}">
+                        <span class="material-symbols-rounded">bakery_dining</span>
                         <span>Producción</span>
                     </a>
 
-                    <a href="#" class="navigation-item" onclick="cambiarModulo('productos', this); return false;">
-                        <span class="material-symbols-rounded">
-                            storefront
-                        </span>
-
+                    <a href="{{ route('productos') }}"
+                        class="navigation-item {{ request()->routeIs('productos') ? 'active' : '' }}">
+                        <span class="material-symbols-rounded">storefront</span>
                         <span>Productos</span>
                     </a>
 
@@ -190,12 +178,15 @@
 
 
                     <!-- CERRAR SESIÓN -->
-                    <button type="button" class="logout-button" title="Cerrar sesión">
-                        <span class="material-symbols-rounded">
-                            logout
-                        </span>
-                    </button>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
 
+                        <button type="submit" class="logout-button" title="Cerrar sesión">
+                            <span class="material-symbols-rounded">
+                                logout
+                            </span>
+                        </button>
+                    </form>
                 </div>
 
             </header>
