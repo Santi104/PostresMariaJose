@@ -16,6 +16,7 @@ class Producto extends Model
         'descripcion',
         'precio_venta',
         'costo_unitario',
+        'stock_actual', // Necesario para guardar stock inicial y editar stock desde el modal.
         'stock_minimo',
         'imagen',
         'activo',
